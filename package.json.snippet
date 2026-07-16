@@ -1,0 +1,42 @@
+{
+  "_comment": "Merge the matching package-manager block into your root package.json. Keep script names stable for CI.",
+  "npm": {
+    "private": true,
+    "packageManager": "npm@11.12.1",
+    "engines": {
+      "node": ">=24.0.0",
+      "npm": ">=11.0.0"
+    },
+    "workspaces": ["apps/*", "packages/*"],
+    "scripts": {
+      "test:architecture": "node --test tests/architecture/*.test.mjs",
+      "scan:secrets": "node scripts/ci/secret-scan.mjs",
+      "ci:lint": "echo \"wire lint/typecheck\" && exit 1",
+      "ci:build": "echo \"wire build\" && exit 1",
+      "ci:test": "echo \"wire tests\" && exit 1",
+      "ci:security": "npm run scan:secrets && npm audit --audit-level=critical",
+      "pr:create": "node scripts/gh-pr-staging.mjs",
+      "pr:promote": "node scripts/gh-pr-promote.mjs",
+      "rulesets:apply": "node scripts/gh-ruleset-apply.mjs"
+    }
+  },
+  "pnpm": {
+    "private": true,
+    "packageManager": "pnpm@9.15.0",
+    "engines": {
+      "node": ">=24.0.0",
+      "pnpm": ">=9.0.0"
+    },
+    "scripts": {
+      "test:architecture": "node --test tests/architecture/*.test.mjs",
+      "scan:secrets": "node scripts/ci/secret-scan.mjs",
+      "ci:lint": "echo \"wire lint/typecheck\" && exit 1",
+      "ci:build": "echo \"wire build\" && exit 1",
+      "ci:test": "echo \"wire tests\" && exit 1",
+      "ci:security": "pnpm scan:secrets && node scripts/ci/audit-critical.mjs",
+      "pr:create": "node scripts/gh-pr-staging.mjs",
+      "pr:promote": "node scripts/gh-pr-promote.mjs",
+      "rulesets:apply": "node scripts/gh-ruleset-apply.mjs"
+    }
+  }
+}

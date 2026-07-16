@@ -1,0 +1,22 @@
+{
+  "strictness": 2,
+  "commentTypes": ["logic", "syntax", "style"],
+  "triggerOnUpdates": true,
+  "statusCheck": true,
+  "fixWithAI": true,
+  "ignorePatterns": "**/node_modules/**\n**/.next/**\n**/.turbo/**\n**/dist/**\n**/pnpm-lock.yaml\n**/package-lock.json\n**/*.tsbuildinfo\n**/*.generated.*",
+  "includeBranches": ["main", "staging"],
+  "instructions": "Monorepo with feature/* → staging → main. CI runs test:architecture before build. Conventional commits. Flag layer-boundary and secret leaks.",
+  "rules": [
+    {
+      "id": "architecture-invariants",
+      "rule": "Flag changes that would fail test:architecture or violate documented domain ownership boundaries in AGENTS.md / code-structure skill.",
+      "severity": "high"
+    },
+    {
+      "id": "conventional-commits",
+      "rule": "PR titles and commits should use conventional commits (feat:, fix:, docs:, test:, chore:) with optional scope.",
+      "severity": "low"
+    }
+  ]
+}

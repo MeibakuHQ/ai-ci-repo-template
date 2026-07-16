@@ -1,0 +1,24 @@
+node_modules
+/coverage/
+.next/
+.expo/
+*.tsbuildinfo
+.turbo/
+dist/
+build/
+
+# Local secrets
+.env
+.env.*
+!**/.env.example
+**/.env.local
+.local/
+
+# Local Codex / agent scratch
+.codex-remote-attachments/
+output/
+
+# Greploop local review scratch
+.greploop-comments.json
+.greploop-q.graphql
+.greploop-resolve.graphql

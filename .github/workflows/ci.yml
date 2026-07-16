@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request: {}
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# This workflow validates the template itself (zero npm dependencies).
+# When you copy into a product monorepo, keep the job `name:` values and
+# replace install steps with npm ci or pnpm (see comments at bottom).
+
+jobs:
+  architecture:
+    name: Architecture invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm run test:architecture
+
+  lint:
+    name: Lint and typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm run ci:lint
+
+  security:
+    name: Security gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm run ci:security
+
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    needs:
+      - architecture
+      - lint
+      - security
+    if: always() && needs.architecture.result == 'success'
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm run ci:build
+
+# --- Product monorepo: npm -------------------------------------------------
+# - uses: actions/setup-node@v4
+#   with:
+#     node-version: "24"
+#     cache: npm
+# - run: npm ci
+# - run: npm run test:architecture
+
+# --- Product monorepo: pnpm ------------------------------------------------
+# Do NOT set version: when package.json has packageManager: pnpm@x.y.z
+# - uses: pnpm/action-setup@v4
+# - uses: actions/setup-node@v4
+#   with:
+#     node-version: "24"
+#     cache: pnpm
+# - run: pnpm install --frozen-lockfile
+# - run: pnpm test:architecture

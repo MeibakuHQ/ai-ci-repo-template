@@ -1,0 +1,22 @@
+{
+  "name": "@meibaku/ai-ci-repo-template",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Reusable AI agent docs + CI gates + GitHub rulesets scaffold (npm or pnpm).",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "test:architecture": "node --test tests/architecture/*.test.mjs",
+    "scan:secrets": "node scripts/ci/secret-scan.mjs",
+    "ci:lint": "node --check scripts/ci/secret-scan.mjs && node --check scripts/ci/audit-critical.mjs && node --check scripts/gh-pr-staging.mjs && node --check scripts/gh-pr-promote.mjs && node --check scripts/gh-ruleset-apply.mjs",
+    "ci:security": "npm run scan:secrets",
+    "ci:build": "npm run test:architecture",
+    "ci:test": "npm run test:architecture",
+    "pr:create": "node scripts/gh-pr-staging.mjs",
+    "pr:promote": "node scripts/gh-pr-promote.mjs",
+    "rulesets:apply": "node scripts/gh-ruleset-apply.mjs"
+  }
+}
