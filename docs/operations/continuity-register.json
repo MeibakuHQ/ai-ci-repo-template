@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "scope": "YOUR_PRODUCT",
+  "capabilities": [
+    {
+      "id": "release-deploy",
+      "criticality": "critical",
+      "primaryRole": "role://release-operator",
+      "secondaryRole": "role://secondary-operator",
+      "custodyState": "individual",
+      "operabilityState": "documented",
+      "runbook": "docs/operations/deployment.md",
+      "evidence": [],
+      "blockers": [
+        "No independent operator drill recorded yet"
+      ]
+    },
+    {
+      "id": "backup-restore",
+      "criticality": "critical",
+      "primaryRole": "role://release-operator",
+      "secondaryRole": "role://secondary-operator",
+      "custodyState": "individual",
+      "operabilityState": "documented",
+      "runbook": "docs/operations/continuity.md",
+      "evidence": [],
+      "blockers": [
+        "Wire real backup targets; scripts default to --dry-run"
+      ]
+    },
+    {
+      "id": "secrets-custody",
+      "criticality": "critical",
+      "primaryRole": "role://security",
+      "secondaryRole": "role://release-operator",
+      "custodyState": "individual",
+      "operabilityState": "documented",
+      "runbook": "docs/operations/external-actions.md",
+      "evidence": [],
+      "blockers": [
+        "Document institutional secret store outside Git"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "principal-absence",
+      "title": "Principal developer unavailable for 7 days",
+      "minimumCustodyState": "institutional",
+      "minimumOperabilityState": "exercised",
+      "requiredCapabilities": ["release-deploy", "backup-restore", "secrets-custody"]
+    },
+    {
+      "id": "staging-outage",
+      "title": "Staging environment needs redeploy from known-good",
+      "minimumCustodyState": "individual",
+      "minimumOperabilityState": "documented",
+      "requiredCapabilities": ["release-deploy"]
+    }
+  ]
+}

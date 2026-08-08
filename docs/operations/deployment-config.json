@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "scope": "YOUR_PRODUCT",
+  "train": "release-train",
+  "environments": ["staging", "production"],
+  "composePath": "deploy/app/compose.production.yml",
+  "digestRegistryHost": "ghcr.io",
+  "releaseIdPattern": "^release-v[0-9]+\\.[0-9]+\\.[0-9]+([._-][A-Za-z0-9.-]+)?$",
+  "artifacts": {
+    "api": {
+      "repository": "ghcr.io/YOUR_ORG/YOUR_REPO-api",
+      "buildTarget": "api-runner"
+    },
+    "web": {
+      "repository": "ghcr.io/YOUR_ORG/YOUR_REPO-web",
+      "buildTarget": "web-runner"
+    },
+    "migrations": {
+      "repository": "ghcr.io/YOUR_ORG/YOUR_REPO-migrations",
+      "buildTarget": "migration-runner"
+    }
+  },
+  "migrationServices": ["api"],
+  "requiredFiles": [
+    "AGENTS.md",
+    "docs/operations/deployment-config.json",
+    "docs/operations/service-catalog.json",
+    "docs/operations/continuity-register.json",
+    "docs/operations/deployment-capability-register.json"
+  ],
+  "doctorPorts": [3000, 4000]
+}

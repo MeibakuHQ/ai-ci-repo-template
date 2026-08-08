@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "description": "Canonical doc paths that must exist. Extend when adding indexes.",
+  "files": [
+    "docs/CONTEXT.md",
+    "docs/adr/README.md",
+    "docs/opensrc.md",
+    "docs/governance/README.md",
+    "docs/governance/authority-map.json",
+    "docs/governance/invariants.json",
+    "docs/governance/generated-facts.md",
+    "docs/governance/ai-assistant-policy.md",
+    "docs/governance/drill-catalog.json",
+    "docs/operations/deployment-config.json",
+    "docs/operations/service-catalog.json",
+    "docs/operations/continuity-register.json",
+    "docs/operations/deployment-capability-register.json",
+    "docs/operations/recovery-sequence.json",
+    "docs/operations/continuity.md",
+    "docs/operations/deployment.md",
+    "docs/operations/external-actions.md",
+    "docs/operations/second-operator-handover.md",
+    "docs/operations/second-operator-drill-template.md",
+    "AGENTS.md",
+    "CONTRIBUTING.md"
+  ]
+}

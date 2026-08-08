@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "scope": "YOUR_PRODUCT",
+  "services": [
+    {
+      "id": "api",
+      "name": "API",
+      "ownerRole": "role://platform-engineer",
+      "runbook": "docs/operations/deployment.md",
+      "readinessUrl": "http://127.0.0.1:4000/health",
+      "port": 4000,
+      "criticality": "high"
+    },
+    {
+      "id": "web",
+      "name": "Web",
+      "ownerRole": "role://platform-engineer",
+      "runbook": "docs/operations/deployment.md",
+      "readinessUrl": "http://127.0.0.1:3000/health",
+      "port": 3000,
+      "criticality": "high"
+    },
+    {
+      "id": "migrations",
+      "name": "Migrations runner",
+      "ownerRole": "role://platform-engineer",
+      "runbook": "docs/operations/deployment.md",
+      "criticality": "high"
+    }
+  ]
+}

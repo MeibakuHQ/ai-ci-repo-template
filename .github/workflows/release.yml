@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_path:
+        description: Path to candidate manifest JSON in the repo
+        required: true
+        type: string
+      release_id:
+        description: Immutable release id (e.g. release-v1.0.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    name: Promote candidate to release
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Validate candidate
+        run: node scripts/release/manifest.mjs validate-candidate --file "${{ inputs.candidate_path }}"
+      - name: Create release manifest (no rebuild)
+        run: |
+          node scripts/release/manifest.mjs create-release \
+            --candidate "${{ inputs.candidate_path }}" \
+            --release-id "${{ inputs.release_id }}" \
+            --workflow-run "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --actor "role://github-actor/${{ github.actor }}" \
+            --out "release-${{ inputs.release_id }}.json"
+      - name: Validate release
+        run: node scripts/release/manifest.mjs validate-release --file "release-${{ inputs.release_id }}.json"

@@ -36,3 +36,12 @@ gh repo edit YOUR_ORG/YOUR_REPO --default-branch staging
 ## After rulesets are active
 
 Direct pushes to `staging` / `main` are rejected. Ship via `feature/*` → PR → `staging`, then promote `staging` → `main`.
+
+## Optional deploy / continuity checks
+
+See [`branch-protection-config.json`](./branch-protection-config.json). Names like
+`Artifact gate` and `Deployment capability` are **optional** until real targets
+are wired. Do not add them to required ruleset contexts prematurely.
+
+Manual workflows: `release.yml`, `deploy.yml`, `rollback.yml`, `developer-onboarding.yml`.
+Audit live settings with `npm run repo:health`.
