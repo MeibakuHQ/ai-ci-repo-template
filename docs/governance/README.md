@@ -11,6 +11,7 @@ MeibakuHQ monorepos, without product-specific registers (continuity, deploy trai
 | [`invariants.json`](invariants.json) | Short, testable product rules agents must not violate |
 | [`generated-facts.md`](generated-facts.md) | Machine-projected catalogs (do not hand-edit marked sections) |
 | [`ai-assistant-policy.md`](ai-assistant-policy.md) | Advisory / read-only assistant boundaries |
+| [`invariant-profiles.json`](invariant-profiles.json) | Product classification of reusable high-risk safeguards |
 
 ## Workflow
 
@@ -26,4 +27,7 @@ adding a new fact family.
 ## Product adoption
 
 Replace example invariants with your domain rules and wire them to real
-`tests/architecture/` checks. Keep statements short and enforceable.
+`tests/architecture/` checks. Classify every invariant profile as `enforced`
+with existing test paths or `not-applicable` with a lasting rationale. Run
+`npm run adoption:verify`; the canonical template alone may use the explicit
+template self-check.

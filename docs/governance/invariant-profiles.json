@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    {
+      "id": "tenant-propagation",
+      "status": "unconfigured",
+      "ownerRole": "role://platform-architect",
+      "rationale": "",
+      "enforcementTests": [],
+      "requiredScenarios": [
+        "Authenticated tenant context crosses controller, service, and repository seams",
+        "Cross-tenant access is rejected"
+      ]
+    },
+    {
+      "id": "durable-acknowledgement",
+      "status": "unconfigured",
+      "ownerRole": "role://platform-architect",
+      "rationale": "",
+      "enforcementTests": [],
+      "requiredScenarios": [
+        "Successful mutation acknowledgement follows durable commit",
+        "Persistence uncertainty fails closed without an in-memory authority"
+      ]
+    },
+    {
+      "id": "single-source-of-truth",
+      "status": "unconfigured",
+      "ownerRole": "role://platform-architect",
+      "rationale": "",
+      "enforcementTests": [],
+      "requiredScenarios": [
+        "Only the named authority owns canonical records",
+        "Consumer modules cannot create shadow authority"
+      ]
+    },
+    {
+      "id": "external-authority",
+      "status": "unconfigured",
+      "ownerRole": "role://platform-architect",
+      "rationale": "",
+      "enforcementTests": [],
+      "requiredScenarios": [
+        "Terminal state requires a verified authoritative event",
+        "Screenshots, prompts, and unverified callbacks cannot clear the gate"
+      ]
+    }
+  ]
+}

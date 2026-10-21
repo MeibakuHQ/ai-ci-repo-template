@@ -11,6 +11,8 @@ Package manager: **npm** or **pnpm** (document which in the root README). See [`
 - Do **not** edit content between `facts:start` / `facts:end` markers; change the authority, then run `npm run docs:facts:generate`
 - Do not weaken architecture, security, deployment capability, or CI gates to make a build pass
 - Digests only for releases — never mutable image tags
+- Copied products must pass `adoption:verify`; do not use the template-only bypass outside this canonical repository
+- A deploy or rollback cannot succeed without a validated immutable release manifest, configured adapter, and durable evidence
 
 ## Architecture skills
 
@@ -35,6 +37,8 @@ Replace this table with your real layout.
 ## Domain invariants
 
 List product rules agents must not violate (auth model, PII boundaries, environment boundaries). Keep them short and testable via `tests/architecture/`. Seed examples live in [`docs/governance/invariants.json`](docs/governance/invariants.json).
+
+Classify the four reusable safeguards in [`docs/governance/invariant-profiles.json`](docs/governance/invariant-profiles.json): tenant propagation, durable acknowledgement, single source of truth, and external authority. Mark each `enforced` with real test paths or `not-applicable` with an owner and lasting rationale.
 
 ## Documentation comments on touched files
 
@@ -63,6 +67,7 @@ docs and Greptile rules aligned with those tests.
 # npm
 npm run dev:doctor
 npm run onboarding:verify
+npm run adoption:verify
 npm run test:architecture
 npm run deployment:capability:audit
 npm run docs:facts:generate
@@ -72,6 +77,7 @@ npm run ci:security
 # pnpm
 pnpm dev:doctor
 pnpm onboarding:verify
+pnpm adoption:verify
 pnpm test:architecture
 pnpm deployment:capability:audit
 pnpm docs:facts:generate
