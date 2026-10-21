@@ -1,0 +1,14 @@
+# Placeholder production compose for YOUR_PRODUCT.
+# Replace image references with digest-pinned releases from deployment-config.json.
+services:
+  api:
+    image: ghcr.io/YOUR_ORG/YOUR_REPO-api@sha256:REPLACE_WITH_DIGEST
+    ports:
+      - "4000:4000"
+  web:
+    image: ghcr.io/YOUR_ORG/YOUR_REPO-web@sha256:REPLACE_WITH_DIGEST
+    ports:
+      - "3000:3000"
+  migrations:
+    image: ghcr.io/YOUR_ORG/YOUR_REPO-migrations@sha256:REPLACE_WITH_DIGEST
+    profiles: ["migrate"]
