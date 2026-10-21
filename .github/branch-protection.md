@@ -30,12 +30,16 @@ gh api -X POST repos/YOUR_ORG/YOUR_REPO/rulesets --input .github/rulesets/main.j
 gh repo edit YOUR_ORG/YOUR_REPO --default-branch staging
 ```
 
-3. Install Greptile on the org; optionally add `{ "context": "Greptile Review" }` to the main ruleset.
+3. Install Greptile on the org; apply the strict main profile with `npm run rulesets:apply -- OWNER/REPO --with-greptile` when its status check is available.
 4. Ensure `@YOUR_ORG/YOUR_TEAM` exists for CODEOWNERS.
 
 ## After rulesets are active
 
 Direct pushes to `staging` / `main` are rejected. Ship via `feature/*` → PR → `staging`, then promote `staging` → `main`.
+
+Both branches require all four check names above. Main dismisses stale approvals,
+requires approval after the latest push, and requires resolved review threads.
+Run `npm run rulesets:check` before applying remote rulesets.
 
 ## Optional deploy / continuity checks
 

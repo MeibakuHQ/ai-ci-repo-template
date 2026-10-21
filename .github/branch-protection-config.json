@@ -7,6 +7,15 @@
     "Security gates",
     "Build and test"
   ],
+  "reviewPolicies": {
+    "main": {
+      "required_approving_review_count": 1,
+      "dismiss_stale_reviews_on_push": true,
+      "require_code_owner_review": false,
+      "require_last_push_approval": true,
+      "required_review_thread_resolution": true
+    }
+  },
   "optionalCheckNames": [
     "Artifact gate",
     "Deployment capability",

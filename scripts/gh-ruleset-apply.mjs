@@ -10,18 +10,30 @@
  * Tip: apply BEFORE making rulesets the only way to push, or keep a feature
  * branch workflow ready — active rulesets block direct pushes to staging/main.
  */
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
+import { findRepositoryRoot, runExecutable } from "./lib/process-runner.mjs";
+import {
+  loadAndValidateRulesetContract,
+  withOptionalGreptile,
+} from "./github/ruleset-contract.mjs";
 
-const repo = process.argv[2];
+const positional = process.argv.slice(2).filter((item) => !item.startsWith("--"));
+const repo = positional[0];
+const requireGreptile = process.argv.includes("--with-greptile");
 if (!repo || !repo.includes("/")) {
   console.error("Usage: node scripts/gh-ruleset-apply.mjs OWNER/REPO");
   process.exit(1);
 }
 
 const files = ["staging.json", "main.json"];
-const dir = join(process.cwd(), ".github", "rulesets");
+const root = findRepositoryRoot(import.meta.url);
+const dir = join(root, ".github", "rulesets");
+const contract = loadAndValidateRulesetContract(root);
+if (contract.errors.length > 0) {
+  for (const error of contract.errors) console.error(`  - ${error}`);
+  process.exit(1);
+}
 
 for (const file of files) {
   const path = join(dir, file);
@@ -29,11 +41,13 @@ for (const file of files) {
     console.error(`Missing ${path}`);
     process.exit(1);
   }
-  console.log(`Applying ${file} → ${repo} …`);
-  const result = spawnSync(
+  const base = file === "main.json" ? contract.main : contract.staging;
+  const ruleset = withOptionalGreptile(base, file === "main.json" && requireGreptile);
+  console.log(`Applying ${file} → ${repo}${file === "main.json" && requireGreptile ? " with Greptile" : ""} …`);
+  const result = runExecutable(
     "gh",
-    ["api", "-X", "POST", `repos/${repo}/rulesets`, "--input", path],
-    { stdio: "inherit", shell: process.platform === "win32" },
+    ["api", "-X", "POST", `repos/${repo}/rulesets`, "--input", "-"],
+    { stdio: ["pipe", "inherit", "inherit"], input: `${JSON.stringify(ruleset)}\n` },
   );
   if (result.status !== 0) {
     console.error(
