@@ -1,0 +1,24 @@
+{
+  "packages": [
+    { "id": "zod", "why": "schema validation internals" },
+    { "id": "jose", "why": "JWT / JWS helpers" }
+  ],
+  "optional": [],
+  "blocked": [
+    {
+      "id": "next",
+      "reason": "Mega framework — use in-package docs and nextjs.org",
+      "alternatives": ["https://nextjs.org/docs", "node_modules/next/dist/docs/"]
+    },
+    {
+      "id": "react",
+      "reason": "Mega framework — use types and local components",
+      "alternatives": ["https://react.dev"]
+    },
+    {
+      "id": "vercel/next.js",
+      "reason": "Huge clone — blocked unless user explicitly requests",
+      "alternatives": ["https://nextjs.org/docs"]
+    }
+  ]
+}
