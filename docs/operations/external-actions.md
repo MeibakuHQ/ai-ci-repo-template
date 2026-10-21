@@ -10,5 +10,6 @@ Actions that cannot be completed inside this Git repository.
 | Grant registry pull for deploy runners | `role://platform-engineer` | Digest pulls only |
 | DNS / TLS / ingress for production hostnames | institutional ops | Document endpoints without credentials |
 | Schedule second-operator drills | `role://secondary-operator` | Use ISSUE_TEMPLATE; no PHI/secrets |
+| Set release/deployment artifact retention | `role://release-operator` | Preserve known-good manifests and records for the required rollback horizon |
 
 Update this table when your org adds irreversible steps outside Git.

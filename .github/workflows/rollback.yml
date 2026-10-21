@@ -3,8 +3,20 @@ name: Rollback
 on:
   workflow_dispatch:
     inputs:
-      release_id:
-        description: Previous known-good release id
+      current_release_id:
+        description: Currently deployed immutable release id
+        required: true
+        type: string
+      current_release_run_id:
+        description: Release workflow run for the current release
+        required: true
+        type: string
+      target_release_id:
+        description: Previous known-good immutable release id
+        required: true
+        type: string
+      target_release_run_id:
+        description: Release workflow run for the rollback target
         required: true
         type: string
       environment:
@@ -14,6 +26,7 @@ on:
         options: [staging, production]
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -22,15 +35,58 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     timeout-minutes: 30
+    env:
+      CURRENT_RELEASE_ID: ${{ inputs.current_release_id }}
+      TARGET_RELEASE_ID: ${{ inputs.target_release_id }}
+      TARGET_ENVIRONMENT: ${{ inputs.environment }}
+      WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      ACTOR_REFERENCE: role://github-actor/${{ github.actor }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - name: Drive rollback state machine (stub-safe)
+      - name: Download current release manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: release-manifest-${{ inputs.current_release_id }}
+          path: .artifacts/current-release
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.current_release_run_id }}
+      - name: Download target release manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: release-manifest-${{ inputs.target_release_id }}
+          path: .artifacts/target-release
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.target_release_run_id }}
+      - name: Validate both release manifests
+        run: |
+          node scripts/release/manifest.mjs validate-release \
+            --file ".artifacts/current-release/release-$CURRENT_RELEASE_ID.json" \
+            --expected-release-id "$CURRENT_RELEASE_ID"
+          node scripts/release/manifest.mjs validate-release \
+            --file ".artifacts/target-release/release-$TARGET_RELEASE_ID.json" \
+            --expected-release-id "$TARGET_RELEASE_ID"
+      - name: Capability audit
+        run: npm run deployment:capability:audit -- --require-executable --environment "$TARGET_ENVIRONMENT"
+      - name: Execute rollback adapter
         run: |
           node scripts/deploy/deploy.mjs \
+            --execute \
             --mode rollback \
-            --environment "${{ inputs.environment }}" \
-            --release-id "${{ inputs.release_id }}" \
-            --workflow-run "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --environment "$TARGET_ENVIRONMENT" \
+            --release-id "$TARGET_RELEASE_ID" \
+            --current-release-manifest ".artifacts/current-release/release-$CURRENT_RELEASE_ID.json" \
+            --release-manifest ".artifacts/target-release/release-$TARGET_RELEASE_ID.json" \
+            --workflow-run "$WORKFLOW_RUN_URL" \
+            --actor "$ACTOR_REFERENCE" \
+            --out ".artifacts/deployment-record.json"
+      - name: Upload durable rollback record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-record-${{ inputs.environment }}-${{ inputs.target_release_id }}-${{ github.run_id }}
+          path: .artifacts/deployment-record.json
+          if-no-files-found: error
+          retention-days: 90

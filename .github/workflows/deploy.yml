@@ -7,6 +7,10 @@ on:
         description: Approved immutable release id
         required: true
         type: string
+      release_run_id:
+        description: Release workflow run containing the immutable manifest
+        required: true
+        type: string
       environment:
         description: Protected target environment
         required: true
@@ -14,6 +18,7 @@ on:
         options: [staging, production]
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -22,17 +27,47 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     timeout-minutes: 30
+    env:
+      RELEASE_ID: ${{ inputs.release_id }}
+      RELEASE_RUN_ID: ${{ inputs.release_run_id }}
+      TARGET_ENVIRONMENT: ${{ inputs.environment }}
+      WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      ACTOR_REFERENCE: role://github-actor/${{ github.actor }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+      - name: Download immutable release manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: release-manifest-${{ inputs.release_id }}
+          path: .artifacts/releases
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.release_run_id }}
+      - name: Validate release manifest
+        run: |
+          node scripts/release/manifest.mjs validate-release \
+            --file ".artifacts/releases/release-$RELEASE_ID.json" \
+            --expected-release-id "$RELEASE_ID"
       - name: Capability audit
-        run: npm run deployment:capability:audit
-      - name: Drive deployment state machine (stub-safe)
+        run: npm run deployment:capability:audit -- --require-executable --environment "$TARGET_ENVIRONMENT"
+      - name: Execute deployment adapter
         run: |
           node scripts/deploy/deploy.mjs \
+            --execute \
             --mode deploy \
-            --environment "${{ inputs.environment }}" \
-            --release-id "${{ inputs.release_id }}" \
-            --workflow-run "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --environment "$TARGET_ENVIRONMENT" \
+            --release-id "$RELEASE_ID" \
+            --release-manifest ".artifacts/releases/release-$RELEASE_ID.json" \
+            --workflow-run "$WORKFLOW_RUN_URL" \
+            --actor "$ACTOR_REFERENCE" \
+            --out ".artifacts/deployment-record.json"
+      - name: Upload durable deployment record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-record-${{ inputs.environment }}-${{ inputs.release_id }}-${{ github.run_id }}
+          path: .artifacts/deployment-record.json
+          if-no-files-found: error
+          retention-days: 90
