@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "factFamilies": [
+    {
+      "id": "repository-workspaces",
+      "authority": {
+        "path": "package.json",
+        "kind": "manifest",
+        "pointer": "/workspaces"
+      },
+      "consumers": [
+        {
+          "path": "docs/governance/generated-facts.md",
+          "projectionId": "workspace-catalog"
+        }
+      ],
+      "criticality": "high",
+      "reviewPolicy": "change-driven"
+    },
+    {
+      "id": "repository-commands",
+      "authority": {
+        "path": "package.json",
+        "kind": "manifest",
+        "pointer": "/scripts"
+      },
+      "consumers": [
+        {
+          "path": "docs/governance/generated-facts.md",
+          "projectionId": "command-catalog"
+        }
+      ],
+      "criticality": "high",
+      "reviewPolicy": "change-driven"
+    },
+    {
+      "id": "service-catalog",
+      "authority": {
+        "path": "docs/operations/service-catalog.json",
+        "kind": "register"
+      },
+      "consumers": [
+        {
+          "path": "docs/operations/continuity.md",
+          "projectionId": "service-catalog"
+        }
+      ],
+      "criticality": "critical",
+      "reviewPolicy": "change-driven"
+    },
+    {
+      "id": "deployment-capability",
+      "authority": {
+        "path": "docs/operations/deployment-capability-register.json",
+        "kind": "register"
+      },
+      "consumers": [
+        {
+          "path": "docs/operations/deployment.md",
+          "projectionId": "deployment-capability"
+        }
+      ],
+      "criticality": "critical",
+      "reviewPolicy": "dated-evidence"
+    }
+  ]
+}
