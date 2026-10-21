@@ -18,6 +18,15 @@ export const RELEASE_SCHEMA_VERSION = 1;
 export const DEPLOYMENT_RECORD_SCHEMA_VERSION = 1;
 export const ARTIFACT_GATE_NAME = "Artifact gate";
 export const DEPLOYMENT_CAPABILITY_GATE_NAME = "Deployment capability";
+export const DEPLOYMENT_ADAPTER_METHODS = [
+  "validate",
+  "backup",
+  "migrate",
+  "deploy",
+  "readiness",
+  "smoke",
+  "rollback",
+];
 
 export const DEPLOYMENT_CAPABILITY_STATES = [
   "planned",
@@ -116,6 +125,36 @@ export function stableJson(value) {
 /** Deterministically hashes a JSON value without depending on property order. */
 export function digestJson(value) {
   return createHash("sha256").update(stableJson(value)).digest("hex");
+}
+
+/** Validates the product adapter before any target mutation is attempted. */
+export function validateDeploymentAdapter(adapter) {
+  const errors = [];
+  for (const method of DEPLOYMENT_ADAPTER_METHODS) {
+    if (typeof adapter?.[method] !== "function") {
+      errors.push(`deployment adapter must implement ${method}()`);
+    }
+  }
+  return errors;
+}
+
+/** Validates evidence returned by one adapter capability call. */
+export function validateAdapterStepResult(result, step) {
+  const errors = [];
+  const durableEvidence = /^(?:https?:\/\/|artifact:\/\/|registry:\/\/|oci:\/\/|s3:\/\/|gs:\/\/|azure:\/\/)/;
+  if (!result || !["pass", "fail"].includes(result.result)) {
+    errors.push(`${step}: result must be pass or fail`);
+  }
+  if (
+    !Array.isArray(result?.evidence) ||
+    result.evidence.length === 0 ||
+    result.evidence.some(
+      (item) => !validEvidenceReference(item) || !durableEvidence.test(item),
+    )
+  ) {
+    errors.push(`${step}: durable non-stub evidence is required`);
+  }
+  return errors;
 }
 
 function validDateTime(value) {

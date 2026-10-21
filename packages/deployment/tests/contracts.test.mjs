@@ -9,6 +9,9 @@ import {
   createDeploymentRecord,
   validateDeploymentCapabilityRegister,
   validateBreakGlassRecord,
+  validateAdapterStepResult,
+  validateDeploymentAdapter,
+  validateCandidateManifest,
 } from "../src/index.js";
 
 const config = loadDeploymentConfig();
@@ -133,4 +136,53 @@ test("validateBreakGlassRecord rejects shared requester/approver", () => {
     ],
   });
   assert.ok(errors.some((e) => e.includes("requester and approver")));
+});
+
+test("deployment adapter contracts reject missing methods and stub evidence", () => {
+  assert.ok(validateDeploymentAdapter({}).length > 0);
+  assert.deepEqual(
+    validateAdapterStepResult(
+      { result: "pass", evidence: ["stub://succeeded"] },
+      "smoke",
+    ),
+    ["smoke: durable non-stub evidence is required"],
+  );
+});
+
+test("candidate validation rejects a workflow SHA mismatch", () => {
+  const candidate = {
+    schemaVersion: 1,
+    train: config.train,
+    sourceRevision: "a".repeat(40),
+    createdAt: "2026-10-10T00:00:00Z",
+    artifacts: Object.fromEntries(
+      Object.entries(config.artifacts).map(([key, value]) => [
+        key,
+        { reference: `${value.repository}@sha256:${"b".repeat(64)}` },
+      ]),
+    ),
+    migrations: {
+      api: {
+        latest: "001",
+        manifestSha256: "c".repeat(64),
+        entries: [{ id: "001", sha256: "d".repeat(64), previousApplicationCompatibility: "compatible" }],
+      },
+    },
+    configuration: { configurationVersion: "staging-1", lockfileSha256: "e".repeat(64) },
+    verification: {
+      artifactGate: {
+        name: "Artifact gate",
+        conclusion: "success",
+        ref: "refs/heads/staging",
+        headSha: "a".repeat(40),
+        workflowRun: "https://example.test/actions/1",
+      },
+    },
+  };
+  assert.ok(
+    validateCandidateManifest(candidate, {
+      config,
+      expectedSourceRevision: "f".repeat(40),
+    }).includes("sourceRevision does not match the requested commit"),
+  );
 });
