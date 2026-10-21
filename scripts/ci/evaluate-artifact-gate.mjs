@@ -2,24 +2,22 @@
 /**
  * Fail-closed artifact gate aggregator: architecture + capability audit.
  */
-import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import {
+  findRepositoryRoot,
+  runExecutable,
+  runPackageScript,
+} from "../lib/process-runner.mjs";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+const root = findRepositoryRoot(import.meta.url);
 
-const arch = spawnSync(npm, ["run", "test:architecture"], {
-  cwd: root,
-  stdio: "inherit",
-  shell: true,
-});
+const arch = runPackageScript("test:architecture", [], { cwd: root });
 if ((arch.status ?? 1) !== 0) {
   console.error("ci:artifact-gate: architecture failed");
   process.exit(1);
 }
 
-const cap = spawnSync(
+const cap = runExecutable(
   process.execPath,
   [path.join(root, "scripts/deploy/capability-audit.mjs")],
   { cwd: root, stdio: "inherit" },

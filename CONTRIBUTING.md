@@ -34,7 +34,7 @@ No husky/commitlint required — CI and review enforce quality.
 1. `git fetch origin && git checkout -b feature/name origin/staging`
 2. Change the relevant workspace.
 3. If you changed root scripts/workspaces, run `docs:facts:generate` and commit `docs/governance/generated-facts.md`.
-4. Run architecture + lint + security locally (see package manager below).
+4. Run architecture + lint + security locally; copied products must also pass `adoption:verify`.
 5. Push and open PR into `staging` (`npm run pr:create` / `pnpm pr:create`).
 6. Promote with `pr:promote` when ready.
 
@@ -93,7 +93,7 @@ Runbooks: [`docs/operations/deployment.md`](docs/operations/deployment.md),
 | Security gates | `ci:security` |
 | Build and test | `ci:build` (+ `ci:test` if present) |
 
-Live **staging** often requires Architecture + Build only. **main** typically adds ≥1 approval and optionally Greptile Review.
+Both **staging** and **main** require Architecture, Lint, Security, and Build. **main** also requires a current-head approval and resolved review threads. Greptile is opt-in through `rulesets:apply --with-greptile`.
 
 ## Code review
 

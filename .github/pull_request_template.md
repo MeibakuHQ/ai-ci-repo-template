@@ -20,8 +20,11 @@
 
 - [ ] Findings-first review completed (bugs, regressions, missing tests, architecture)
 - [ ] Actionable findings fixed or documented as non-actionable
+- [ ] Review evidence applies to the current head SHA
+- [ ] All review threads are resolved
 
 ## Safety
 
 - [ ] No secrets, production credentials, or sensitive customer data in the diff
 - [ ] Domain ownership / architecture invariants still hold
+- [ ] Tenant, durable-acknowledgement, source-of-truth, and external-authority profiles remain enforced or explicitly not applicable

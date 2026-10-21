@@ -185,13 +185,33 @@ function validateArtifactSet(artifacts, config, errors) {
   const keys = artifactKeys(config);
   const refPattern = digestReferencePattern(config);
   for (const key of keys) {
-    const reference = artifacts?.[key]?.reference;
-    const expectedRepo = config.artifacts[key].repository;
-    if (!refPattern.test(reference ?? "")) {
-      errors.push(`artifacts.${key}.reference must be an immutable registry digest`);
-    } else if (!reference.startsWith(`${expectedRepo}@sha256:`)) {
-      errors.push(`artifacts.${key}.reference uses an unapproved repository`);
+    const artifact = artifacts?.[key];
+    const policy = config.artifacts[key];
+    const reference = artifact?.reference;
+    const kind = policy.kind ?? "registry";
+    if (kind === "registry") {
+      if (!refPattern.test(reference ?? "")) {
+        errors.push(`artifacts.${key}.reference must be an immutable registry digest`);
+      } else if (!reference.startsWith(`${policy.repository}@sha256:`)) {
+        errors.push(`artifacts.${key}.reference uses an unapproved repository`);
+      }
+      continue;
     }
+    if (kind === "external") {
+      const prefixes = policy.allowedPrefixes ?? [];
+      if (
+        !validEvidenceReference(reference) ||
+        prefixes.length === 0 ||
+        !prefixes.some((prefix) => reference.startsWith(prefix))
+      ) {
+        errors.push(`artifacts.${key}.reference uses an unapproved external authority`);
+      }
+      if (!digestPattern.test(artifact?.sha256 ?? "")) {
+        errors.push(`artifacts.${key}.sha256 is required for an external artifact`);
+      }
+      continue;
+    }
+    errors.push(`artifacts.${key} has unsupported policy kind ${kind}`);
   }
   for (const key of Object.keys(artifacts ?? {})) {
     if (!keys.includes(key)) errors.push(`artifacts.${key} is not an approved artifact`);

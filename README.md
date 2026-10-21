@@ -22,7 +22,8 @@ Patterns distilled from production MeibakuHQ monorepos — generic enough for an
    gh repo edit YOUR_ORG/YOUR_REPO --default-branch staging
    ```
 
-6. Set default PR base to `staging`; install Greptile on the org when ready.
+6. Classify every profile in [`invariant-profiles.json`](docs/governance/invariant-profiles.json), add product architecture tests, configure a deployment adapter, then run `npm run adoption:verify`.
+7. Set default PR base to `staging`; install Greptile on the org when ready.
 
 ## What’s included
 
@@ -53,6 +54,7 @@ Patterns distilled from production MeibakuHQ monorepos — generic enough for an
 | `scripts/governance/docs-facts.mjs` | Generate/check workspace + command catalogs |
 | `scripts/deploy/*` / `scripts/release/*` / `scripts/operations/*` | Deploy/ops stubs |
 | `scripts/dev/doctor.mjs` / `onboarding-verify.mjs` | Clean-machine readiness |
+| `scripts/dev/adoption-verify.mjs` | Fail-closed product adoption / placeholder check |
 | `scripts/opensrc-*.mjs` | Optional OpenSRC helpers (soft-skip) |
 | `scripts/gh-ruleset-apply.mjs` | Apply staging + main rulesets via `gh` |
 | `scripts/gh-pr-*.mjs` | PR helpers (`pr:create` / `pr:promote`) |
@@ -80,7 +82,7 @@ feature/* | fix/* | chore/*  →  staging  →  main
 | Security gates | `ci:security` |
 | Build and test | `ci:build` (+ optional `ci:test`) |
 
-Staging usually requires **Architecture** + **Build**. Main adds ≥1 approval (and Greptile when enabled).
+Both protected branches require all four checks. Main also requires a current-head approval and resolved review threads. Add Greptile explicitly with `npm run rulesets:apply -- OWNER/REPO --with-greptile`.
 
 ## Touched TSDoc (product repos)
 
@@ -111,7 +113,7 @@ npm run ci:artifact-gate
 # Manual workflows: release.yml → deploy.yml → rollback.yml
 ```
 
-See [`docs/operations/deployment.md`](docs/operations/deployment.md). Digests only; optional deploy checks stay out of required rulesets until real targets exist.
+See [`docs/operations/deployment.md`](docs/operations/deployment.md). Digests only. Release manifests cross workflows as immutable Actions artifacts; Deploy and Rollback fail until a product adapter and `ci-verified` capability are configured. Use `npm run deploy:simulate` for non-mutating validation.
 
 ## Hard-won tips (from production use)
 
@@ -120,12 +122,13 @@ See [`docs/operations/deployment.md`](docs/operations/deployment.md). Digests on
 3. **pnpm audit 410:** The legacy npm audit API may return 410. Use `scripts/ci/audit-critical.mjs` so secret-scan stays the hard gate while advisories are soft-skipped.
 4. **Job names are contracts:** Ruleset `context` strings must match workflow `name:` fields character-for-character.
 5. **Don’t nest this template inside a product git tree** as a subfolder you commit — use “Use this template” or copy files once.
+6. **Adoption is a gate:** `adoption:verify` must fail until placeholders, product boundary tests, invariant profiles, and the deployment adapter are resolved.
 
 ## Intentionally omitted
 
 - Husky / lefthook / commitlint
 - Product domain architecture tests (extend `tests/architecture/`)
-- Live institutional continuity evidence / Keycloak / clinical adapters
+- Live institutional continuity evidence / product deployment adapters
 - Project-board PAT automation; forcing deploy jobs onto default rulesets
 - Org-wide Greptile install (manual org step)
 
@@ -140,6 +143,8 @@ npm run onboarding:verify
 npm run ci:lint
 npm run ci:security
 ```
+
+`onboarding:verify` uses a canonical-repository-only self-check in this template. Copied product repositories use the snippet command without that bypass and must pass `adoption:verify` normally.
 
 ## License
 

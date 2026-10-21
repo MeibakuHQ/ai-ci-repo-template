@@ -58,7 +58,6 @@ jobs:
       - architecture
       - lint
       - security
-    if: always() && needs.architecture.result == 'success'
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

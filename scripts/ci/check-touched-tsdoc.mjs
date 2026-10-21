@@ -53,6 +53,11 @@ export function loadTypescript() {
   }
 }
 
+/** Returns whether a missing TypeScript compiler must fail this invocation. */
+export function missingTypescriptExitCode(argv = process.argv.slice(2)) {
+  return argv.includes("--require-typescript") ? 1 : 0;
+}
+
 /** Resolves the comparison base from CLI arguments before CI environment fallbacks. */
 export function resolveBase(argv = process.argv.slice(2), env = process.env) {
   const baseIdx = argv.indexOf("--base");
@@ -358,6 +363,12 @@ export function checkFile(file, changedLineNumbers) {
 function main() {
   const ts = loadTypescript();
   if (!ts) {
+    if (missingTypescriptExitCode() === 1) {
+      console.error(
+        "touched-tsdoc: typescript is required when this gate is enabled",
+      );
+      return 1;
+    }
     console.log(
       "touched-tsdoc: skip (typescript not installed). Add typescript as a root/devDependency in product repos.",
     );

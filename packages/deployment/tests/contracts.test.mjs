@@ -186,3 +186,49 @@ test("candidate validation rejects a workflow SHA mismatch", () => {
     }).includes("sourceRevision does not match the requested commit"),
   );
 });
+
+test("candidate validation accepts checksummed external artifacts", () => {
+  const externalConfig = {
+    ...config,
+    artifacts: {
+      web: {
+        kind: "external",
+        allowedPrefixes: ["artifact://github-actions/web/"],
+      },
+    },
+    migrationServices: [],
+  };
+  const candidate = {
+    schemaVersion: 1,
+    train: config.train,
+    sourceRevision: "a".repeat(40),
+    createdAt: "2026-10-10T00:00:00Z",
+    artifacts: {
+      web: {
+        reference: "artifact://github-actions/web/12345",
+        sha256: "b".repeat(64),
+      },
+    },
+    migrations: {},
+    configuration: {
+      configurationVersion: "staging-1",
+      lockfileSha256: "c".repeat(64),
+    },
+    verification: {
+      artifactGate: {
+        name: "Artifact gate",
+        conclusion: "success",
+        ref: "refs/heads/staging",
+        headSha: "a".repeat(40),
+        workflowRun: "https://example.test/actions/1",
+      },
+    },
+  };
+  assert.deepEqual(validateCandidateManifest(candidate, { config: externalConfig }), []);
+  candidate.artifacts.web.reference = "https://mutable.example/latest";
+  assert.ok(
+    validateCandidateManifest(candidate, { config: externalConfig }).some((error) =>
+      error.includes("unapproved external authority"),
+    ),
+  );
+});

@@ -22,3 +22,5 @@ lines. Treat non-actionable observations separately from required fixes.
 - Actionable AI findings fixed
 - Non-actionable findings documented in the PR
 - PR template checklist complete
+- Approval and AI evidence match the current head SHA
+- Review threads are resolved before promotion

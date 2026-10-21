@@ -9,17 +9,19 @@
     },
     "workspaces": ["apps/*", "packages/*"],
     "scripts": {
-      "test:architecture": "node --test tests/architecture/*.test.mjs && node --test packages/deployment/tests/*.test.mjs && node --test packages/governance/tests/*.test.mjs && node scripts/governance/docs-facts.mjs check",
-      "test:touched-tsdoc": "node scripts/ci/check-touched-tsdoc.mjs",
+      "test:architecture": "node --test tests/architecture/*.test.mjs scripts/lib/*.test.mjs scripts/github/*.test.mjs scripts/deploy/*.test.mjs scripts/dev/*.test.mjs && node --test packages/deployment/tests/*.test.mjs && node --test packages/governance/tests/*.test.mjs && node scripts/github/ruleset-contract.mjs && node scripts/governance/docs-facts.mjs check",
+      "test:touched-tsdoc": "node scripts/ci/check-touched-tsdoc.mjs --require-typescript",
       "docs:facts:generate": "node scripts/governance/docs-facts.mjs generate",
       "docs:facts:check": "node scripts/governance/docs-facts.mjs check",
       "scan:secrets": "node scripts/ci/secret-scan.mjs",
       "deployment:capability:audit": "node scripts/deploy/capability-audit.mjs",
       "release:manifest": "node scripts/release/manifest.mjs",
+      "deploy:simulate": "node scripts/deploy/simulate.mjs",
       "ops:health": "node scripts/operations/health.mjs",
       "ops:backup": "node scripts/operations/backup.mjs",
       "ops:restore": "node scripts/operations/restore.mjs",
       "dev:doctor": "node scripts/dev/doctor.mjs",
+      "adoption:verify": "node scripts/dev/adoption-verify.mjs",
       "onboarding:verify": "node scripts/dev/onboarding-verify.mjs",
       "repo:health": "node scripts/repo-health.mjs",
       "ci:artifact-gate": "node scripts/ci/evaluate-artifact-gate.mjs",
@@ -31,6 +33,7 @@
       "ci:security": "npm run scan:secrets && npm audit --audit-level=critical",
       "pr:create": "node scripts/gh-pr-staging.mjs",
       "pr:promote": "node scripts/gh-pr-promote.mjs",
+      "rulesets:check": "node scripts/github/ruleset-contract.mjs",
       "rulesets:apply": "node scripts/gh-ruleset-apply.mjs"
     }
   },
@@ -42,17 +45,19 @@
       "pnpm": ">=9.0.0"
     },
     "scripts": {
-      "test:architecture": "node --test tests/architecture/*.test.mjs && node --test packages/deployment/tests/*.test.mjs && node --test packages/governance/tests/*.test.mjs && node scripts/governance/docs-facts.mjs check",
-      "test:touched-tsdoc": "node scripts/ci/check-touched-tsdoc.mjs",
+      "test:architecture": "node --test tests/architecture/*.test.mjs scripts/lib/*.test.mjs scripts/github/*.test.mjs scripts/deploy/*.test.mjs scripts/dev/*.test.mjs && node --test packages/deployment/tests/*.test.mjs && node --test packages/governance/tests/*.test.mjs && node scripts/github/ruleset-contract.mjs && node scripts/governance/docs-facts.mjs check",
+      "test:touched-tsdoc": "node scripts/ci/check-touched-tsdoc.mjs --require-typescript",
       "docs:facts:generate": "node scripts/governance/docs-facts.mjs generate",
       "docs:facts:check": "node scripts/governance/docs-facts.mjs check",
       "scan:secrets": "node scripts/ci/secret-scan.mjs",
       "deployment:capability:audit": "node scripts/deploy/capability-audit.mjs",
       "release:manifest": "node scripts/release/manifest.mjs",
+      "deploy:simulate": "node scripts/deploy/simulate.mjs",
       "ops:health": "node scripts/operations/health.mjs",
       "ops:backup": "node scripts/operations/backup.mjs",
       "ops:restore": "node scripts/operations/restore.mjs",
       "dev:doctor": "node scripts/dev/doctor.mjs",
+      "adoption:verify": "node scripts/dev/adoption-verify.mjs",
       "onboarding:verify": "node scripts/dev/onboarding-verify.mjs",
       "repo:health": "node scripts/repo-health.mjs",
       "ci:artifact-gate": "node scripts/ci/evaluate-artifact-gate.mjs",
@@ -64,6 +69,7 @@
       "ci:security": "pnpm scan:secrets && node scripts/ci/audit-critical.mjs",
       "pr:create": "node scripts/gh-pr-staging.mjs",
       "pr:promote": "node scripts/gh-pr-promote.mjs",
+      "rulesets:check": "node scripts/github/ruleset-contract.mjs",
       "rulesets:apply": "node scripts/gh-ruleset-apply.mjs"
     }
   }

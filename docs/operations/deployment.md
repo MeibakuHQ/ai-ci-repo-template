@@ -19,6 +19,11 @@ Set `deploymentAdapterModule` to a repository module implementing `validate`,
 `backup`, `migrate`, `deploy`, `readiness`, `smoke`, and `rollback`. Every method
 returns `{ result: "pass" | "fail", evidence: string[] }`; `stub://` evidence is rejected.
 
+Artifact policies default to `kind: "registry"` and require an approved
+`repository@sha256:<digest>` reference. Products deployed through external build
+authorities may instead use `kind: "external"`, constrain immutable identifiers
+with `allowedPrefixes`, and must record the downloaded artifact's SHA-256 digest.
+
 ## Capability honesty
 
 [`deployment-capability-register.json`](deployment-capability-register.json) records maturity.
