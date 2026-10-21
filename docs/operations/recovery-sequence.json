@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "total-host-loss",
+  "scope": "YOUR_PRODUCT",
+  "steps": [
+    {
+      "id": "confirm-empty-targets",
+      "instruction": "Confirm restore targets are empty and named correctly.",
+      "runbook": "docs/operations/continuity.md",
+      "serviceId": "api"
+    },
+    {
+      "id": "restore-api-data",
+      "instruction": "Restore the API datastore from the latest verified backup checkpoint.",
+      "runbook": "docs/operations/continuity.md",
+      "serviceId": "api"
+    },
+    {
+      "id": "run-migrations",
+      "instruction": "Apply migrations from the known-good release digest only.",
+      "runbook": "docs/operations/deployment.md",
+      "serviceId": "migrations"
+    },
+    {
+      "id": "redeploy-known-good",
+      "instruction": "Deploy the last known-good release digests; do not rebuild.",
+      "runbook": "docs/operations/deployment.md",
+      "serviceId": "web"
+    },
+    {
+      "id": "verify-readiness",
+      "instruction": "Run readiness probes and record evidence without secrets.",
+      "runbook": "docs/operations/continuity.md"
+    }
+  ]
+}

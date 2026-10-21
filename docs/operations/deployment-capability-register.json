@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "scope": "YOUR_PRODUCT",
+  "lastReviewedAt": "2026-08-08",
+  "states": [
+    "planned",
+    "implemented",
+    "ci-verified",
+    "staging-proven",
+    "production-proven",
+    "institutionally-operable"
+  ],
+  "capabilities": [
+    {
+      "id": "staging-deploy",
+      "environment": "staging",
+      "implementationState": "planned",
+      "executableWorkflow": ".github/workflows/deploy.yml",
+      "testEvidence": [],
+      "rollbackEvidence": [],
+      "authorisedOperatorRole": "role://release-operator",
+      "secondaryOperatorRole": "role://secondary-operator",
+      "lastReviewedAt": "2026-08-08",
+      "blockers": [
+        "Replace YOUR_ORG image repositories and prove a staging deploy + rollback"
+      ]
+    },
+    {
+      "id": "production-deploy",
+      "environment": "production",
+      "implementationState": "planned",
+      "executableWorkflow": ".github/workflows/deploy.yml",
+      "testEvidence": [],
+      "rollbackEvidence": [],
+      "authorisedOperatorRole": "role://release-operator",
+      "secondaryOperatorRole": "role://secondary-operator",
+      "lastReviewedAt": "2026-08-08",
+      "blockers": [
+        "Staging must reach staging-proven before production evidence is claimed"
+      ]
+    }
+  ]
+}
