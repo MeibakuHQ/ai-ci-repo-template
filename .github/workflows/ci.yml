@@ -67,6 +67,47 @@ jobs:
           node-version: "24"
       - run: npm run ci:build
 
+  # --- Product monorepo: optional Touched TSDoc job -----------------------
+  # Requires typescript + fetch-depth for PR base. Do NOT rename required
+  # jobs above (ruleset context strings). Example:
+  #
+  # touched-tsdoc:
+  #   name: Touched TSDoc
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'pull_request'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "24"
+  #     - run: npm ci   # or pnpm install --frozen-lockfile
+  #     - run: npm run test:touched-tsdoc
+  #       env:
+  #         TOUCHED_TSDOC_BASE: origin/${{ github.base_ref }}
+
+  # --- Optional: Deployment capability / Artifact gate -------------------
+  # capability:
+  #   name: Deployment capability
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "24"
+  #     - run: npm run deployment:capability:audit
+  #
+  # artifact-gate:
+  #   name: Artifact gate
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "24"
+  #     - run: npm run ci:artifact-gate
+
 # --- Product monorepo: npm -------------------------------------------------
 # - uses: actions/setup-node@v4
 #   with:

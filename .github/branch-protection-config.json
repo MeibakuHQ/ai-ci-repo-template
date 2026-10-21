@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "description": "Machine checklist for operators. Optional deploy checks are NOT required by default rulesets.",
+  "requiredCheckNames": [
+    "Architecture invariants",
+    "Lint and typecheck",
+    "Security gates",
+    "Build and test"
+  ],
+  "optionalCheckNames": [
+    "Artifact gate",
+    "Deployment capability",
+    "Touched TSDoc",
+    "Onboarding verify"
+  ],
+  "environments": ["staging", "production"],
+  "rulesetPaths": [
+    ".github/rulesets/staging.json",
+    ".github/rulesets/main.json"
+  ],
+  "manualSteps": [
+    "Create GitHub Environments staging and production with required reviewers",
+    "Replace YOUR_ORG artifact repositories in docs/operations/deployment-config.json",
+    "Apply rulesets only after first successful CI on main/staging",
+    "Do not add optional deploy checks to rulesets until workflows are wired for real targets"
+  ]
+}

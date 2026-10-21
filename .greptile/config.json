@@ -6,11 +6,36 @@
   "fixWithAI": true,
   "ignorePatterns": "**/node_modules/**\n**/.next/**\n**/.turbo/**\n**/dist/**\n**/pnpm-lock.yaml\n**/package-lock.json\n**/*.tsbuildinfo\n**/*.generated.*",
   "includeBranches": ["main", "staging"],
-  "instructions": "Monorepo with feature/* → staging → main. CI runs test:architecture before build. Conventional commits. Flag layer-boundary and secret leaks.",
+  "instructions": "Monorepo with feature/* → staging → main. CI runs test:architecture (includes docs:facts:check) before build. Digests-only releases. Conventional commits. Flag layer-boundary and secret leaks. Prefer AGENTS.md and docs/governance/ / docs/operations/ over guesses.",
   "rules": [
     {
       "id": "architecture-invariants",
-      "rule": "Flag changes that would fail test:architecture or violate documented domain ownership boundaries in AGENTS.md / code-structure skill.",
+      "rule": "Flag changes that would fail test:architecture or violate documented domain ownership boundaries in AGENTS.md / code-structure skill / docs/governance/invariants.json.",
+      "severity": "high"
+    },
+    {
+      "id": "digest-only-deploy",
+      "rule": "Flag release/deploy changes that introduce mutable image tags (:latest, unpinned branches) instead of registry@sha256 digests. Align with packages/deployment and docs/operations/deployment.md.",
+      "severity": "high"
+    },
+    {
+      "id": "capability-honesty",
+      "rule": "Do not raise deployment-capability-register implementationState without matching evidence arrays. Do not weaken capability or artifact gates to force green CI.",
+      "severity": "high"
+    },
+    {
+      "id": "touched-tsdoc",
+      "rule": "On new or changed exported functions, classes, types, interfaces, and function-like consts in the PR diff, require a short non-empty TSDoc/JSDoc block that states intent, invariants, ownership, or safety — not a restatement of the name. Align with AGENTS.md and npm run test:touched-tsdoc.",
+      "severity": "medium"
+    },
+    {
+      "id": "docs-facts",
+      "rule": "Do not hand-edit content between facts:start and facts:end markers. Change the authority in package.json (or authority-map.json), then run docs:facts:generate.",
+      "severity": "medium"
+    },
+    {
+      "id": "drill-no-secrets",
+      "rule": "Continuity drill issues and ops docs must not contain passwords, tokens, private key material, or .env contents.",
       "severity": "high"
     },
     {
