@@ -1,120 +1,75 @@
 #!/usr/bin/env node
-/**
- * Drive the deployment state machine in stub mode (validate + log; no cluster).
- *
- *   node scripts/deploy/deploy.mjs --mode deploy --environment staging --dry-run
- *   node scripts/deploy/deploy.mjs --mode rollback --environment staging --dry-run
- */
+/** Executes a real deploy or rollback through a configured product adapter. */
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { loadDeploymentConfig } from "../../packages/deployment/src/index.js";
+import { findRepositoryRoot } from "../lib/process-runner.mjs";
 import {
-  canTransition,
-  createDeploymentRecord,
-  decideRecovery,
-  loadDeploymentConfig,
-  transitionDeployment,
-} from "../../packages/deployment/src/index.js";
+  executeDeployment,
+  executeRollback,
+  loadDeploymentAdapter,
+  readReleaseManifest,
+  resolveInsideRepository,
+} from "./runner.mjs";
 
 function argValue(flag) {
-  const idx = process.argv.indexOf(flag);
-  return idx >= 0 ? process.argv[idx + 1] : null;
+  const index = process.argv.indexOf(flag);
+  return index >= 0 ? process.argv[index + 1] : null;
 }
 
-const config = loadDeploymentConfig();
-const mode = argValue("--mode") ?? "deploy";
-const environment = argValue("--environment") ?? "staging";
-const dryRun = !process.argv.includes("--execute");
+const root = findRepositoryRoot(import.meta.url);
+const configPath = argValue("--config");
+const config = loadDeploymentConfig(
+  configPath ? resolveInsideRepository(root, configPath, "deployment config") : undefined,
+);
+const mode = argValue("--mode");
+const environment = argValue("--environment");
+const releasePath = argValue("--release-manifest");
+const releaseId = argValue("--release-id");
+const workflowRun = argValue("--workflow-run");
+const actor = argValue("--actor");
+const output = argValue("--out") ?? ".artifacts/deployment-record.json";
 
-if (!(config.environments ?? []).includes(environment)) {
-  console.error(`unknown environment: ${environment}`);
+if (!process.argv.includes("--execute")) {
+  console.error("Execution requires --execute; use npm run deploy:simulate for a non-mutating plan");
   process.exit(1);
 }
-
-const releaseId = argValue("--release-id") ?? "release-v0.0.0-stub";
-const now = new Date().toISOString();
-
-function transition(state, reasonCode) {
-  return {
-    state,
-    timestamp: now,
-    workflowRun: argValue("--workflow-run") ?? "local://deploy-stub",
-    reasonCode,
-    entryConditions: [{ id: "precheck", result: "pass" }],
-    successConditions: [{ id: "step", result: "pass" }],
-    evidence: [`stub://${state}`],
-  };
+if (!mode || !["deploy", "rollback"].includes(mode)) {
+  throw new Error("--mode must be deploy or rollback");
+}
+if (!environment || !releasePath || !releaseId || !workflowRun || !actor) {
+  throw new Error("environment, release manifest, release id, workflow run, and actor are required");
+}
+if (!(config.environments ?? []).includes(environment)) {
+  throw new Error(`unknown environment: ${environment}`);
 }
 
-console.log(
-  JSON.stringify(
-    {
-      mode,
+const release = readReleaseManifest(root, releasePath, config);
+if (release.releaseId !== releaseId) {
+  throw new Error("release id does not match the manifest");
+}
+const adapter = await loadDeploymentAdapter(root, config);
+const result = mode === "deploy"
+  ? await executeDeployment({ release, environment, config, adapter, workflowRun, actor })
+  : await executeRollback({
+      currentRelease: readReleaseManifest(
+        root,
+        argValue("--current-release-manifest"),
+        config,
+      ),
+      targetRelease: release,
       environment,
-      dryRun,
-      composePath: config.composePath,
-      artifacts: Object.keys(config.artifacts ?? {}),
-    },
-    null,
-    2,
-  ),
-);
+      config,
+      adapter,
+      workflowRun,
+      actor,
+    });
 
-if (mode === "recover") {
-  const decision = decideRecovery({
-    mutationStarted: process.argv.includes("--mutation-started"),
-    migrationTransactionRolledBack: process.argv.includes("--migration-rolled-back"),
-    previousApplicationCompatible: process.argv.includes("--compatible"),
-    dataIntegrityCertain: !process.argv.includes("--integrity-uncertain"),
-    recoveryChecksPass: process.argv.includes("--recovery-checks-pass"),
-    knownGoodAvailable: process.argv.includes("--known-good"),
-  });
-  console.log("recovery:", decision);
-  process.exit(0);
+const outputPath = resolveInsideRepository(root, output, "deployment record output");
+mkdirSync(path.dirname(outputPath), { recursive: true });
+writeFileSync(outputPath, `${JSON.stringify(result.record, null, 2)}\n`);
+console.log(`wrote ${path.relative(root, outputPath)}`);
+if (!result.ok) {
+  console.error(result.error instanceof Error ? result.error.message : result.error);
+  process.exitCode = 1;
 }
-
-let record = createDeploymentRecord(
-  {
-    schemaVersion: 1,
-    deploymentId: `deploy://${environment}/${Date.now()}`,
-    releaseId,
-    releaseManifestSha256: "b".repeat(64),
-    configurationVersion: `${environment}-stub`,
-    environment,
-    targetId: `target://${environment}`,
-    requestedBy: "role://release-operator",
-  },
-  transition("requested", "operator-request"),
-  { config },
-);
-
-const pathStates =
-  mode === "rollback"
-    ? ["validated", "approved", "rollback-started", "rolled-back"]
-    : [
-        "validated",
-        "approved",
-        "backup-created",
-        "migrations-started",
-        "migrations-completed",
-        "services-deploying",
-        "readiness-checking",
-        "smoke-testing",
-        "succeeded",
-      ];
-
-for (const state of pathStates) {
-  if (!canTransition(record.state, state)) {
-    console.error(`illegal: ${record.state} -> ${state}`);
-    process.exit(1);
-  }
-  record = transitionDeployment(record, transition(state, state));
-  console.log(`→ ${state}`);
-}
-
-if (dryRun) {
-  console.log("deploy: dry-run complete (pass --execute only after wiring a real target)");
-} else {
-  console.log(
-    "deploy: --execute acknowledged; compose/cluster hooks are still stubs — wire them before production use",
-  );
-}
-
-console.log(`final state: ${record.state}`);

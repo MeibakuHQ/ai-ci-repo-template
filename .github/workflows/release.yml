@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       candidate_path:
-        description: Path to candidate manifest JSON in the repo
+        description: Repository-relative candidate manifest path on staging
         required: true
         type: string
       release_id:
@@ -21,20 +21,44 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     timeout-minutes: 15
+    env:
+      CANDIDATE_PATH: ${{ inputs.candidate_path }}
+      RELEASE_ID: ${{ inputs.release_id }}
+      SOURCE_REVISION: ${{ github.sha }}
+      SOURCE_REF: ${{ github.ref }}
+      WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      ACTOR_REFERENCE: role://github-actor/${{ github.actor }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - name: Validate candidate
-        run: node scripts/release/manifest.mjs validate-candidate --file "${{ inputs.candidate_path }}"
-      - name: Create release manifest (no rebuild)
+      - name: Require staging source
+        run: test "$SOURCE_REF" = "refs/heads/staging"
+      - name: Validate candidate at this commit
         run: |
+          node scripts/release/manifest.mjs validate-candidate \
+            --file "$CANDIDATE_PATH" \
+            --expected-source-revision "$SOURCE_REVISION"
+      - name: Create release manifest without rebuilding
+        run: |
+          mkdir -p .artifacts/releases
           node scripts/release/manifest.mjs create-release \
-            --candidate "${{ inputs.candidate_path }}" \
-            --release-id "${{ inputs.release_id }}" \
-            --workflow-run "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --actor "role://github-actor/${{ github.actor }}" \
-            --out "release-${{ inputs.release_id }}.json"
+            --candidate "$CANDIDATE_PATH" \
+            --release-id "$RELEASE_ID" \
+            --expected-source-revision "$SOURCE_REVISION" \
+            --workflow-run "$WORKFLOW_RUN_URL" \
+            --actor "$ACTOR_REFERENCE" \
+            --out ".artifacts/releases/release-$RELEASE_ID.json"
       - name: Validate release
-        run: node scripts/release/manifest.mjs validate-release --file "release-${{ inputs.release_id }}.json"
+        run: |
+          node scripts/release/manifest.mjs validate-release \
+            --file ".artifacts/releases/release-$RELEASE_ID.json" \
+            --expected-release-id "$RELEASE_ID"
+      - name: Upload immutable release manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-manifest-${{ inputs.release_id }}
+          path: .artifacts/releases/release-${{ inputs.release_id }}.json
+          if-no-files-found: error
+          retention-days: 90

@@ -6,6 +6,7 @@ Package for an independent operator to run staging/production without the princi
 
 - [ ] GitHub Environment approval rights for `staging` (and `production` when ready)
 - [ ] Read access to release manifests and known-good digests
+- [ ] Release workflow run ids for current and rollback-target manifests
 - [ ] Access to the institutional secret store (not Git)
 - [ ] Ability to run `npm run onboarding:verify` and `npm run deployment:capability:audit`
 - [ ] Contact path for break-glass approver (distinct from requester)
