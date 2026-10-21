@@ -11,6 +11,7 @@
     "docs/governance/generated-facts.md",
     "docs/governance/ai-assistant-policy.md",
     "docs/governance/drill-catalog.json",
+    "docs/governance/invariant-profiles.json",
     "docs/operations/deployment-config.json",
     "docs/operations/service-catalog.json",
     "docs/operations/continuity-register.json",

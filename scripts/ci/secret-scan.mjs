@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Lightweight repository secret scanner for CI.
- * Dependency-free; scans tracked text files; ignores example/placeholder context.
+ * Dependency-free; scans tracked and untracked text files while ignoring
+ * example/placeholder context. Untracked files matter during local review.
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -89,8 +90,12 @@ function shouldSkip(file) {
   return SKIP_PATHS.some((re) => re.test(file));
 }
 
-function listTrackedFiles() {
-  const out = execFileSync("git", ["ls-files", "-z"], { encoding: "buffer" });
+function listRepositoryFiles() {
+  const out = execFileSync(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+    { encoding: "buffer" },
+  );
   return out
     .toString("utf8")
     .split("\0")
@@ -124,7 +129,7 @@ function scanFile(file) {
   return findings;
 }
 
-const files = listTrackedFiles().filter(
+const files = listRepositoryFiles().filter(
   (f) => !shouldSkip(f) && isTextCandidate(f),
 );
 const all = files.flatMap(scanFile);

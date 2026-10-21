@@ -3,11 +3,10 @@
  * Cross-platform launcher for repo health audit (read-only by default).
  * On Windows prefers the PowerShell script; elsewhere prints gh checklist.
  */
-import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { findRepositoryRoot, runExecutable } from "./lib/process-runner.mjs";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const root = findRepositoryRoot(import.meta.url);
 const apply = process.argv.includes("--apply");
 const repo = process.argv.find((a, i, arr) => arr[i - 1] === "--repo") ?? null;
 
@@ -16,7 +15,7 @@ if (process.platform === "win32") {
   const args = ["-NoProfile", "-File", ps1];
   if (repo) args.push("-Repo", repo);
   if (apply) args.push("-Apply");
-  const result = spawnSync("powershell.exe", args, { cwd: root, stdio: "inherit" });
+  const result = runExecutable("powershell.exe", args, { cwd: root });
   process.exit(result.status ?? 1);
 }
 

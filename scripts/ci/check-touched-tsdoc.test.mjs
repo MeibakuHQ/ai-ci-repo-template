@@ -5,6 +5,7 @@ import {
   checkSource,
   findTsdocAbove,
   loadTypescript,
+  missingTypescriptExitCode,
   parseAddedLineNumbers,
   resolveBase,
 } from "./check-touched-tsdoc.mjs";
@@ -41,6 +42,11 @@ test("resolveBase prefers --base then env", () => {
     "origin/main",
   );
   assert.equal(resolveBase([], {}), null);
+});
+
+test("enabled TSDoc gate fails when TypeScript is unavailable", () => {
+  assert.equal(missingTypescriptExitCode(["--require-typescript"]), 1);
+  assert.equal(missingTypescriptExitCode([]), 0);
 });
 
 test("findTsdocAbove associates documentation through single and multiline decorators", () => {
