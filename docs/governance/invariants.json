@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "invariants": [
+    {
+      "id": "INV-001",
+      "statement": "Apps import shared domain only via package names; no relative deep-imports into packages/ and no app → app imports.",
+      "severity": "critical",
+      "ownerRoles": ["platform-architect"],
+      "source": "AGENTS.md",
+      "enforcement": ["npm run test:architecture", ".cursor/skills/code-structure"],
+      "changeRequires": "adr"
+    },
+    {
+      "id": "INV-002",
+      "statement": "Secrets, .env files, and private key material must not be committed.",
+      "severity": "critical",
+      "ownerRoles": ["platform-architect", "security"],
+      "source": "SECURITY.md",
+      "enforcement": ["npm run ci:security", "scripts/ci/secret-scan.mjs"],
+      "changeRequires": "security-review"
+    },
+    {
+      "id": "INV-003",
+      "statement": "Do not weaken architecture, security, or CI gates to make a build pass; change the authority named in authority-map.json instead of hand-editing generated facts.",
+      "severity": "high",
+      "ownerRoles": ["platform-architect"],
+      "source": "docs/governance/README.md",
+      "enforcement": ["npm run docs:facts:check"],
+      "changeRequires": "adr"
+    }
+  ]
+}

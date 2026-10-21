@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "drills": [
+    {
+      "id": "clean-machine-onboarding",
+      "title": "Clean-machine developer onboarding",
+      "evidenceType": "onboarding-verify",
+      "validityDays": 90,
+      "instructions": "Run npm run onboarding:verify on a clean checkout and file the ISSUE_TEMPLATE drill form."
+    },
+    {
+      "id": "second-operator-takeover",
+      "title": "Second-operator takeover",
+      "evidenceType": "independent-operator-drill",
+      "validityDays": 180,
+      "instructions": "Secondary operator follows docs/operations/second-operator-handover.md without the principal present."
+    },
+    {
+      "id": "staging-rollback",
+      "title": "Staging rollback to known-good",
+      "evidenceType": "staging-rollback",
+      "validityDays": 90,
+      "instructions": "Use rollback.yml against a previous known-good release; record digest evidence only."
+    },
+    {
+      "id": "backup-restore-dry-run",
+      "title": "Backup and restore dry-run",
+      "evidenceType": "backup-restore-drill",
+      "validityDays": 90,
+      "instructions": "Run ops:backup and ops:restore with --dry-run; never paste secrets into the issue."
+    }
+  ]
+}

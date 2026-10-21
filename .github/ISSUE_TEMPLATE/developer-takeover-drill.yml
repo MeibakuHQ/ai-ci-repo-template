@@ -1,0 +1,48 @@
+name: Developer takeover drill
+description: Record a clean-machine or second-operator continuity drill (no secrets)
+title: "[drill] "
+labels: ["continuity-drill"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do **not** paste passwords, tokens, private endpoints, or customer data.
+        Digests and workflow URLs only.
+  - type: dropdown
+    id: drill
+    attributes:
+      label: Drill type
+      options:
+        - clean-machine-onboarding
+        - second-operator-takeover
+        - staging-rollback
+        - backup-restore-dry-run
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Date (YYYY-MM-DD)
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence (digests / workflow URLs)
+      description: Secret-free references only
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options:
+        - pass
+        - fail
+    validations:
+      required: true
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / follow-ups
+      description: Update continuity-register blockers if needed
