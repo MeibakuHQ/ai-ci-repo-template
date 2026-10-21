@@ -1,0 +1,14 @@
+{
+  "name": "@template/deployment",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fail-closed deployment contracts, state transitions, and recovery policy",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}
