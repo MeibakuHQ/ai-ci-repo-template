@@ -1,0 +1,36 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: Previous known-good release id
+        required: true
+        type: string
+      environment:
+        description: Protected target environment
+        required: true
+        type: choice
+        options: [staging, production]
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    name: Rollback to known-good
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Drive rollback state machine (stub-safe)
+        run: |
+          node scripts/deploy/deploy.mjs \
+            --mode rollback \
+            --environment "${{ inputs.environment }}" \
+            --release-id "${{ inputs.release_id }}" \
+            --workflow-run "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

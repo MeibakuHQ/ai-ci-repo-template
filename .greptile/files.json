@@ -1,0 +1,49 @@
+{
+  "description": "High-signal paths for Greptile orientation (template scaffold).",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "note": "Agent entrypoint — skills, invariants, TSDoc policy"
+    },
+    {
+      "path": "docs/governance/authority-map.json",
+      "note": "Fact authorities; do not invent a second inventory"
+    },
+    {
+      "path": "docs/governance/invariants.json",
+      "note": "Short enforceable product rules"
+    },
+    {
+      "path": ".cursor/skills/code-structure/SKILL.md",
+      "note": "Layer placement"
+    },
+    {
+      "path": ".cursor/skills/architecture-review/SKILL.md",
+      "note": "PR checklist + deepening review"
+    },
+    {
+      "path": "tests/architecture/",
+      "note": "Architecture gates run in CI before build"
+    },
+    {
+      "path": "docs/operations/deployment.md",
+      "note": "Promote → deploy → rollback; digests only"
+    },
+    {
+      "path": "packages/deployment/",
+      "note": "Fail-closed deploy contracts"
+    },
+    {
+      "path": "packages/governance/",
+      "note": "Continuity assessment + register validators"
+    },
+    {
+      "path": "scripts/ci/check-touched-tsdoc.mjs",
+      "note": "PR-diff TSDoc gate (needs typescript in product repos)"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "note": "Job name: strings are ruleset contracts"
+    }
+  ]
+}
