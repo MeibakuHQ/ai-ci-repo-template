@@ -8,6 +8,12 @@ export const OPERABILITY_STATES = [
   "exercised",
   "verified",
 ];
+export const REQUIRED_INVARIANT_PROFILE_IDS = [
+  "tenant-propagation",
+  "durable-acknowledgement",
+  "single-source-of-truth",
+  "external-authority",
+];
 
 function isIsoDate(value) {
   return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -156,6 +162,53 @@ export function validateDrillCatalog(catalog) {
   }
   if (!Array.isArray(catalog?.drills) || catalog.drills.length === 0) {
     errors.push("drill catalog requires drills");
+  }
+  return errors;
+}
+
+/** Validates adoption decisions for reusable high-risk invariant profiles. */
+export function validateInvariantProfiles(
+  register,
+  { requireClassified = false, testPathExists = () => true } = {},
+) {
+  const errors = [];
+  if (register?.schemaVersion !== 1) {
+    errors.push("invariant profiles schemaVersion must equal 1");
+  }
+  const profiles = new Map();
+  for (const profile of register?.profiles ?? []) {
+    if (!profile?.id || profiles.has(profile.id)) {
+      errors.push(`duplicate or missing invariant profile id: ${profile?.id ?? "<missing>"}`);
+      continue;
+    }
+    profiles.set(profile.id, profile);
+    if (!profile.ownerRole) errors.push(`${profile.id}: ownerRole is required`);
+    if (!Array.isArray(profile.requiredScenarios) || profile.requiredScenarios.length === 0) {
+      errors.push(`${profile.id}: requiredScenarios are required`);
+    }
+    if (!["unconfigured", "enforced", "not-applicable"].includes(profile.status)) {
+      errors.push(`${profile.id}: invalid status`);
+    }
+    if (requireClassified && profile.status === "unconfigured") {
+      errors.push(`${profile.id}: classify as enforced or not-applicable`);
+    }
+    if (profile.status === "enforced") {
+      if (!Array.isArray(profile.enforcementTests) || profile.enforcementTests.length === 0) {
+        errors.push(`${profile.id}: enforced profiles require test paths`);
+      }
+      for (const testPath of profile.enforcementTests ?? []) {
+        if (!testPathExists(testPath)) errors.push(`${profile.id}: missing test ${testPath}`);
+      }
+    }
+    if (
+      profile.status === "not-applicable" &&
+      (typeof profile.rationale !== "string" || profile.rationale.trim().length < 20)
+    ) {
+      errors.push(`${profile.id}: not-applicable requires a lasting rationale`);
+    }
+  }
+  for (const id of REQUIRED_INVARIANT_PROFILE_IDS) {
+    if (!profiles.has(id)) errors.push(`missing required invariant profile: ${id}`);
   }
   return errors;
 }

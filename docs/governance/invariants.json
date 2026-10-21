@@ -27,6 +27,33 @@
       "source": "docs/governance/README.md",
       "enforcement": ["npm run docs:facts:check"],
       "changeRequires": "adr"
+    },
+    {
+      "id": "INV-004",
+      "statement": "Protected staging and main branches require Architecture, Lint, Security, and Build checks; main review evidence must apply to the latest push and all threads must be resolved.",
+      "severity": "critical",
+      "ownerRoles": ["platform-architect", "security"],
+      "source": ".github/branch-protection-config.json",
+      "enforcement": ["npm run rulesets:check", "npm run test:architecture"],
+      "changeRequires": "adr"
+    },
+    {
+      "id": "INV-005",
+      "statement": "Deploy and rollback cannot report success without a validated immutable release manifest, configured adapter, and durable non-stub evidence.",
+      "severity": "critical",
+      "ownerRoles": ["release-operator", "platform-architect"],
+      "source": "docs/operations/deployment.md",
+      "enforcement": ["packages/deployment/tests", "scripts/deploy/runner.test.mjs"],
+      "changeRequires": "adr"
+    },
+    {
+      "id": "INV-006",
+      "statement": "Product repositories classify tenant propagation, durable acknowledgement, single-source-of-truth, and external-authority safeguards before adoption is accepted.",
+      "severity": "high",
+      "ownerRoles": ["platform-architect"],
+      "source": "docs/governance/invariant-profiles.json",
+      "enforcement": ["npm run adoption:verify"],
+      "changeRequires": "adr"
     }
   ]
 }

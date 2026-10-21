@@ -62,6 +62,40 @@
       ],
       "criticality": "critical",
       "reviewPolicy": "dated-evidence"
+    },
+    {
+      "id": "branch-protection-contract",
+      "authority": {
+        "path": ".github/branch-protection-config.json",
+        "kind": "register"
+      },
+      "consumers": [
+        {
+          "path": ".github/rulesets/staging.json",
+          "projectionId": "staging-required-checks"
+        },
+        {
+          "path": ".github/rulesets/main.json",
+          "projectionId": "main-required-checks-and-review"
+        }
+      ],
+      "criticality": "critical",
+      "reviewPolicy": "change-driven"
+    },
+    {
+      "id": "invariant-profile-classification",
+      "authority": {
+        "path": "docs/governance/invariant-profiles.json",
+        "kind": "register"
+      },
+      "consumers": [
+        {
+          "path": "scripts/dev/adoption-verify.mjs",
+          "projectionId": "adoption-profile-validation"
+        }
+      ],
+      "criticality": "high",
+      "reviewPolicy": "change-driven"
     }
   ]
 }

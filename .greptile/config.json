@@ -6,7 +6,7 @@
   "fixWithAI": true,
   "ignorePatterns": "**/node_modules/**\n**/.next/**\n**/.turbo/**\n**/dist/**\n**/pnpm-lock.yaml\n**/package-lock.json\n**/*.tsbuildinfo\n**/*.generated.*",
   "includeBranches": ["main", "staging"],
-  "instructions": "Monorepo with feature/* → staging → main. CI runs test:architecture (includes docs:facts:check) before build. Digests-only releases. Conventional commits. Flag layer-boundary and secret leaks. Prefer AGENTS.md and docs/governance/ / docs/operations/ over guesses.",
+  "instructions": "Monorepo with feature/* → staging → main. CI runs four required checks; Build must not report success after an upstream failure. Reviews and deployment evidence must match the current source SHA. Digests-only releases. Conventional commits. Flag layer-boundary and secret leaks. Prefer AGENTS.md and docs/governance/ / docs/operations/ over guesses.",
   "rules": [
     {
       "id": "architecture-invariants",
@@ -21,6 +21,21 @@
     {
       "id": "capability-honesty",
       "rule": "Do not raise deployment-capability-register implementationState without matching evidence arrays. Do not weaken capability or artifact gates to force green CI.",
+      "severity": "high"
+    },
+    {
+      "id": "current-head-evidence",
+      "rule": "Flag merge or release claims whose approval, required checks, manifest source revision, or review evidence does not apply to the current head SHA.",
+      "severity": "high"
+    },
+    {
+      "id": "deployment-adapter-evidence",
+      "rule": "Flag deployment or rollback success that does not cross the configured adapter, validate an immutable release artifact, and persist structured durable evidence before acknowledgement. Simulation must never emit a successful terminal state.",
+      "severity": "high"
+    },
+    {
+      "id": "product-adoption-profiles",
+      "rule": "Product repositories must classify every invariant profile as enforced with real tests or not-applicable with an owner and rationale; unresolved scaffold placeholders and generic ownership are blockers.",
       "severity": "high"
     },
     {

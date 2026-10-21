@@ -7,6 +7,7 @@ import {
   assessContinuity,
   validateContinuityRegister,
   validateDrillCatalog,
+  validateInvariantProfiles,
   validateFactAuthorityMap,
   validateRecoverySequence,
   validateServiceCatalog,
@@ -45,6 +46,15 @@ test("continuity register validates and principal-absence is at-risk", () => {
 
 test("drill catalog validates", () => {
   assert.deepEqual(validateDrillCatalog(readJson("docs/governance/drill-catalog.json")), []);
+});
+
+test("invariant profiles validate as an intentionally unconfigured scaffold", () => {
+  const register = readJson("docs/governance/invariant-profiles.json");
+  assert.deepEqual(validateInvariantProfiles(register), []);
+  assert.equal(
+    validateInvariantProfiles(register, { requireClassified: true }).length,
+    4,
+  );
 });
 
 test("empty dependency policy allows edges", () => {
